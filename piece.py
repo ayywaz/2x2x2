@@ -28,12 +28,18 @@ turns = {
     "z": {"cycles": [[6, 7, 5, 4], [2, 3, 1, 0]], "rotation": "F"},
 }
 
-reorentations = {
-    "x": [2, 3, 6, 7, 0, 1, 4, 5],
-    "y": [4, 0, 6, 2, 5, 1, 7, 3],
-    "z": [1, 3, 0, 2, 5, 7, 4, 6],
-    "x'": [4, 5, 0, 1, 6, 7, 2, 3],
-}
+reorentations = [  # Where there is index it becomes the value
+    {"ids": [0, 1, 2, 3, 4, 5, 6, 7]},
+    {"ids": [2, 0, 3, 1, 6, 4, 7, 5], "rotation": ["R", "U", "F"]},
+    {"ids": [1, 3, 0, 2, 5, 7, 4, 6], "rotation": ["R", "U", "F"]},
+    {"ids": [3, 2, 1, 0, 7, 6, 5, 4]},
+    {"ids": [2, 3, 6, 7, 0, 1, 4, 5], "rotation": ["F", "R", "U"]},
+    {"ids": [5, 4, 7, 6, 1, 0, 3, 2]},
+    {"ids": [6, 7, 4, 5, 2, 3, 0, 1]},
+    {"ids": [7, 3, 5, 1, 6, 2, 4, 0], "rotation": "U"},
+    {"ids": [0, 2, 4, 6, 1, 3, 5, 7], "rotation": "R"},  # rotation = 1
+    {"ids": [0, 4, 1, 5, 2, 6, 3, 7], "rotation": "F"},  # rotation = 2
+]
 
 
 def swap4(f: List[int], t: List[int], this: List):
@@ -85,30 +91,32 @@ class Cube:
             return "No solution"
 
     def fix_center(self):
-        print(self._position, self._rotation)
-        if self._position.index(0) % 4 == 1:
-            self.make_turn("z")
-        elif self._position.index(0) % 4 == 2:
-            self.make_turn("z'")
-        elif self._position.index(0) % 4 == 3:
-            self.make_turn("z2")
-
-        if self._position.index(0) == 4:
-            self.make_turn("x'")
-        print(self._position, self._rotation)
-
+        """if self._position[0] == 1:
+            if self._rotation[0] == 2:
+                self._rotate([list(range(8))], rotations["F"])
+            elif self._rotation[0] == 1:
+                self._rotate([list(range(8))], rotations["U"])
+            elif self._rotation[0] == 0:
+                self._rotate([list(range(8))], rotations["R"])
+        elif self._position[0] == 4:
+            if self._rotation[0] == 1:
+                self._rotate([list(range(8))], rotations["R"])
+            elif self._rotation[0] == 0:
+                self._rotate([list(range(8))], rotations["F"])
+            elif self._rotation[0] == 2:
+                self._rotate([list(range(8))], rotations["U"])
+        elif self._position[0] == 2:
+            if self._rotation[0] == 2:
+                self._rotate([list(range(8))], rotations["F"])
+            elif self._rotation[0] == 1:
+                self._rotate([list(range(8))], rotations["U"])
+            elif self._rotation[0] == 0:
+                self._rotate([list(range(8))], rotations["R"])"""
+        self.reorentate(self._position[0])
         if self._rotation[0] == 1:
-            # self.apply_scramble("x y")
-            self._swap(turns["x"]["cycles"], False, False)
-            self._swap(turns["y"]["cycles"], False, False)
+            self.reorentate(8, True)
         elif self._rotation[0] == 2:
-            # self.make_turn("z'")
-            # self.make_turn("y'")
-            self._swap(turns["z"]["cycles"], True, False)
-            self._swap(turns["y"]["cycles"], True, False)
-        print(self._position, self._rotation)
-        rotation = rotations["R" if self._rotation[0] == 1 else "F"]
-        self._rotation[0] != 0 and self._rotate([list(range(8))], rotation)
+            self.reorentate(9, True)
 
     def apply_scramble(self, scramble: str):
         moves = scramble.split(' ')
@@ -123,6 +131,18 @@ class Cube:
         cycles = turns[turn[0]]["cycles"]
         self._swap(cycles, backward, double)
         not double and self._rotate(cycles, rotation)
+
+    def reorentate(self, index: int, rotate: bool = False):
+        reorentation = reorentations[index]
+        ids = reorentation["ids"]
+        for i, n in enumerate(self._position):
+            self._position[i] = ids[n]
+
+        if "rotation" in reorentation:
+            rotation = 0 if len(
+                reorentation["rotation"]) == 1 else self._rotation[0]
+            self._rotate([list(range(8))],
+                         rotations[reorentation["rotation"][rotation]])
 
     def _swap(self, cycles: List[List[int]], backward: bool, double: bool):
         for cycle in cycles:
