@@ -1,8 +1,8 @@
 from typing import List
 import json
-
-with open("positions.json", "r") as f:
-    P = json.load(f)
+from functools import reduce
+from math import factorial
+from bisect import bisect
 
 with open("possibilities.json", "r") as f:
     R = json.load(f)
@@ -77,10 +77,18 @@ class Cube:
 
     def get_index(self):
         self.fix_center()
-        positions = "".join(map(str, self._position[1:]))
         rotations = "".join(map(str, self._rotation[1:]))
+
+        used = []
+
+        def calc(acc, v):
+            index = bisect(used, v[1])
+            used.insert(index, v[1])
+            return acc + (v[1] - index - 1) * factorial(6 - v[0])
+        position = reduce(calc, enumerate(self._position[1:]), 0)
+
         try:
-            return P[positions] * 729 + R[rotations]
+            return position * 729 + R[rotations]
         except KeyError:
             return -1
 
@@ -91,27 +99,6 @@ class Cube:
             return "No solution"
 
     def fix_center(self):
-        """if self._position[0] == 1:
-            if self._rotation[0] == 2:
-                self._rotate([list(range(8))], rotations["F"])
-            elif self._rotation[0] == 1:
-                self._rotate([list(range(8))], rotations["U"])
-            elif self._rotation[0] == 0:
-                self._rotate([list(range(8))], rotations["R"])
-        elif self._position[0] == 4:
-            if self._rotation[0] == 1:
-                self._rotate([list(range(8))], rotations["R"])
-            elif self._rotation[0] == 0:
-                self._rotate([list(range(8))], rotations["F"])
-            elif self._rotation[0] == 2:
-                self._rotate([list(range(8))], rotations["U"])
-        elif self._position[0] == 2:
-            if self._rotation[0] == 2:
-                self._rotate([list(range(8))], rotations["F"])
-            elif self._rotation[0] == 1:
-                self._rotate([list(range(8))], rotations["U"])
-            elif self._rotation[0] == 0:
-                self._rotate([list(range(8))], rotations["R"])"""
         self.reorentate(self._position[0])
         if self._rotation[0] == 1:
             self.reorentate(8, True)
@@ -124,13 +111,13 @@ class Cube:
             [self.make_turn(move) for move in moves]
 
     def make_turn(self, turn: str):
-        backward = len(turn) == 2 and turn[1] == "'"
-        double = len(turn) == 2 and turn[1] == "2"
+        backward = (len(turn) == 2 and turn[1] == "'")
+        double = (len(turn) == 2 and turn[1] == "2")
         # TODO make some kind of API or methods to return rotation and cycles
         rotation = rotations[turns[turn[0]]["rotation"]]
         cycles = turns[turn[0]]["cycles"]
         self._swap(cycles, backward, double)
-        not double and self._rotate(cycles, rotation)
+        not double and self._rotate(rotation, cycles)
 
     def reorentate(self, index: int, rotate: bool = False):
         reorentation = reorentations[index]
@@ -139,10 +126,9 @@ class Cube:
             self._position[i] = ids[n]
 
         if "rotation" in reorentation:
-            rotation = 0 if len(
-                reorentation["rotation"]) == 1 else self._rotation[0]
-            self._rotate([list(range(8))],
-                         rotations[reorentation["rotation"][rotation]])
+            rotation = (0 if len(reorentation["rotation"]) == 1
+                        else self._rotation[0])
+            self._rotate(rotations[reorentation["rotation"][rotation]])
 
     def _swap(self, cycles: List[List[int]], backward: bool, double: bool):
         for cycle in cycles:
@@ -152,7 +138,8 @@ class Cube:
             swap4(cycle, to, self._position)
             swap4(cycle, to, self._rotation)
 
-    def _rotate(self, cycles: List[List[int]], rotation: List[int]):
+    def _rotate(self, rotation: List[int],
+                cycles: List[List[int]] = [list(range(8))]):
         for piece in [y for x in cycles for y in x]:
             self._rotation[piece] = rotation[self._rotation[piece]]
 

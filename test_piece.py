@@ -38,13 +38,11 @@ class TestPiece(unittest.TestCase):
         self.default_cube._swap(piece.turns["L"]["cycles"], False, False)
         self.assertEqual(self.default_cube._position, [4, 1, 0, 3, 6, 5, 2, 7])
 
-        # x - [1, 5, 3, 7, 0, 4, 2, 6]
-
     def test_rotate(self):
-        self.default_cube._rotate([list(range(8))], [0, 2, 1])  # "y"
+        self.default_cube._rotate([0, 2, 1])  # "y"
         self.assertEqual(self.default_cube._rotation, [0] * 8)
 
-        self.default_cube._rotate([list(range(8))], [1, 0, 2])  # "x"
+        self.default_cube._rotate([1, 0, 2])  # "x"
         self.assertEqual(self.default_cube._rotation, [1] * 8)
 
     def test_make_turn(self):
@@ -57,7 +55,7 @@ class TestPiece(unittest.TestCase):
         self.default_cube.fix_center()
         self.assertEqual(self.default_cube._position, self._solved_position)
 
-        self.default_cube.apply_scramble("z y")
+        self.default_cube.apply_scramble("z'")
         self.default_cube.fix_center()
         self.assertEqual(self.default_cube._position, self._solved_position)
 
@@ -70,9 +68,7 @@ class TestPiece(unittest.TestCase):
         self.default_cube.fix_center()
         self.assertEqual(self.default_cube._position, [0, 1, 2, 3, 5, 7, 4, 6])
 
-        self.default_cube.make_turn("x2")
-        self.default_cube.make_turn("z'")
-        self.default_cube.make_turn("y")
+        self.default_cube.apply_scramble("x2 z' y")
         self.default_cube.fix_center()
         self.assertEqual(self.default_cube._position, [0, 3, 2, 7, 4, 1, 6, 5])
 
@@ -92,7 +88,7 @@ class TestPiece(unittest.TestCase):
 
     def test_get_index(self):
         self.default_cube.apply_scramble("L U' R U2 L' U R' U")
-        # print(piece.CASES[self.default_cube.get_index()])
+        print(piece.CASES[self.default_cube.get_index()])
 
 
 if __name__ == '__main__':
