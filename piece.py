@@ -36,7 +36,7 @@ reorentations = [  # Where there is index it becomes the value
     {"ids": [2, 3, 6, 7, 0, 1, 4, 5], "rotation": ["F", "R", "U"]},
     {"ids": [5, 4, 7, 6, 1, 0, 3, 2]},
     {"ids": [6, 7, 4, 5, 2, 3, 0, 1]},
-    {"ids": [7, 3, 5, 1, 6, 2, 4, 0], "rotation": "U"},
+    {"ids": [7, 3, 5, 1, 6, 2, 4, 0]},
     {"ids": [0, 2, 4, 6, 1, 3, 5, 7], "rotation": "R"},  # rotation = 1
     {"ids": [0, 4, 1, 5, 2, 6, 3, 7], "rotation": "F"},  # rotation = 2
 ]
@@ -101,9 +101,9 @@ class Cube:
     def fix_center(self):
         self.reorentate(self._position[0])
         if self._rotation[0] == 1:
-            self.reorentate(8, True)
+            self.reorentate(8)
         elif self._rotation[0] == 2:
-            self.reorentate(9, True)
+            self.reorentate(9)
 
     def apply_scramble(self, scramble: str):
         moves = scramble.split(' ')
@@ -119,7 +119,7 @@ class Cube:
         self._swap(cycles, backward, double)
         not double and self._rotate(rotation, cycles)
 
-    def reorentate(self, index: int, rotate: bool = False):
+    def reorentate(self, index: int):
         reorentation = reorentations[index]
         ids = reorentation["ids"]
         for i, n in enumerate(self._position):
